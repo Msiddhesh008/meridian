@@ -27,3 +27,4 @@ npm run dev
 - Overload warnings & weekly report + CSV export
 - Installable PWA with offline shell
 - All data stored in IndexedDB (`meridian_local`)
+# meridian
