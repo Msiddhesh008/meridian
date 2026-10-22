@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { profile } from '../config/profile'
+import { useEffect, useState } from 'react'
+import { useStore } from '../store/useStore'
 
 type Props = {
   size?: number
@@ -9,14 +9,19 @@ type Props = {
   float?: boolean
 }
 
-/** Profile photo — uses transparent `public/avatar.png`. */
+/** Profile photo — uses Settings avatar (or default public asset). */
 export function UserAvatar({
   size = 80,
   className = '',
   ring = true,
   float = false,
 }: Props) {
+  const profile = useStore((s) => s.profile)
   const [src, setSrc] = useState(profile.avatarSrc)
+
+  useEffect(() => {
+    setSrc(profile.avatarSrc)
+  }, [profile.avatarSrc])
 
   if (float) {
     return (

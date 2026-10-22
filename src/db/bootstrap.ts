@@ -1,3 +1,4 @@
+import { defaultProfile, type UserProfile } from '../config/profile'
 import { seedAssignments, seedMembers, seedProjects } from '../data/seed'
 import type {
   Assignment,
@@ -11,6 +12,7 @@ import { db } from './database'
 
 const LEGACY_KEY = 'meridian-v1'
 const SEEDED_KEY = 'seeded'
+const PROFILE_KEY = 'profile'
 
 type LegacySnapshot = {
   state?: {
@@ -98,8 +100,28 @@ function clearLegacyLocalStorage() {
   }
 }
 
+export async function loadProfileFromDb(): Promise<UserProfile> {
+  const row = await db.meta.get(PROFILE_KEY)
+  if (!row?.value) return { ...defaultProfile }
+  try {
+    const parsed = JSON.parse(row.value) as Partial<UserProfile>
+    return {
+      ...defaultProfile,
+      ...parsed,
+      avatarFallback: parsed.avatarFallback || defaultProfile.avatarFallback,
+      avatarSrc: parsed.avatarSrc || defaultProfile.avatarSrc,
+    }
+  } catch {
+    return { ...defaultProfile }
+  }
+}
+
+export async function saveProfileToDb(profile: UserProfile) {
+  await db.meta.put({ key: PROFILE_KEY, value: JSON.stringify(profile) })
+}
+
 export async function loadAllFromDb() {
-  const [members, projects, assignments, attendance, sessions, notes, activeMeta] =
+  const [members, projects, assignments, attendance, sessions, notes, activeMeta, profile] =
     await Promise.all([
       db.members.toArray(),
       db.projects.toArray(),
@@ -108,6 +130,7 @@ export async function loadAllFromDb() {
       db.sessions.orderBy('startedAt').toArray(),
       db.notes.toArray(),
       db.meta.get('activeSessionId'),
+      loadProfileFromDb(),
     ])
 
   return {
@@ -117,6 +140,7 @@ export async function loadAllFromDb() {
     attendance,
     sessions,
     notes,
+    profile,
     activeSessionId: activeMeta?.value ? activeMeta.value : null,
   }
 }

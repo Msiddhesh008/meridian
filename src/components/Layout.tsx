@@ -8,6 +8,7 @@ import {
   Sparkles,
   Search,
   Bell,
+  // Settings,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
@@ -15,7 +16,6 @@ import { useStore } from '../store/useStore'
 import { derivePresence, formatDuration, sessionMinutes } from '../lib/time'
 import { Button } from './ui'
 import { UserAvatar } from './UserAvatar'
-import { profile } from '../config/profile'
 
 const links = [
   { to: '/', label: 'Today', icon: LayoutDashboard, end: true },
@@ -23,6 +23,7 @@ const links = [
   { to: '/team', label: 'Team', icon: Users },
   { to: '/projects', label: 'Projects', icon: FolderKanban },
   { to: '/reports', label: 'Reports', icon: BarChart3 },
+  // { to: '/settings', label: 'Settings', icon: Settings },
 ]
 
 const titles: Record<string, string> = {
@@ -31,10 +32,12 @@ const titles: Record<string, string> = {
   '/team': 'Team',
   '/projects': 'Projects',
   '/reports': 'Reports',
+  '/settings': 'Settings',
 }
 
 export function Layout() {
   const location = useLocation()
+  const profile = useStore((s) => s.profile)
   const attendance = useStore((s) => s.attendance)
   const sessions = useStore((s) => s.sessions)
   const activeSessionId = useStore((s) => s.activeSessionId)
@@ -51,7 +54,6 @@ export function Layout() {
 
   return (
     <div className="flex h-dvh gap-4 overflow-hidden px-3 pt-3 pb-0 sm:px-4 sm:pt-4 lg:gap-5 lg:px-5 lg:pt-5">
-      {/* Sidebar only — bottom gap; layout itself has no bottom padding */}
       <aside
         className="relative mb-3 hidden h-[calc(100%-0.75rem)] w-[240px] shrink-0 flex-col overflow-hidden rounded-[2rem] bg-gradient-to-b from-[#1e2d4a] via-[#1b2740] to-[#152033] p-5 text-white lg:sticky lg:top-0 lg:flex"
         style={{ boxShadow: 'var(--shadow-sidebar)' }}
@@ -60,7 +62,9 @@ export function Layout() {
         <div className="pointer-events-none absolute -bottom-10 -left-6 h-36 w-36 rounded-full bg-lavender/20 blur-3xl" />
 
         <div className="relative mb-7 flex flex-col items-center text-center">
-          <UserAvatar size={96} float className="mb-3" />
+          <NavLink to="/settings" className="mb-3 transition hover:scale-[1.03]">
+            <UserAvatar size={96} float />
+          </NavLink>
           <p className="font-display text-lg font-semibold tracking-tight">
             Hi, {profile.shortName}!
           </p>
@@ -78,22 +82,30 @@ export function Layout() {
           </span>
         </div>
 
-        <nav className="relative flex flex-1 flex-col gap-1">
+        <nav className="relative flex flex-1 flex-col gap-1.5">
           {links.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
               end={end}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-medium transition ${
-                  isActive
-                    ? 'bg-gradient-to-r from-[#eef3fb] to-white text-ink shadow-[0_10px_24px_rgba(0,0,0,0.28)]'
-                    : 'text-white/50 hover:bg-white/[0.06] hover:text-white'
+                `flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition duration-50 ${
+                  isActive ? 'nav-active-3d' : 'nav-idle'
                 }`
               }
             >
-              <Icon size={17} strokeWidth={1.85} />
-              {label}
+              {({ isActive }) => (
+                <>
+                  <span
+                    className={`inline-flex h-8 w-8 items-center justify-center rounded-xl ${
+                      isActive ? 'nav-active-icon' : 'bg-white/[0.06]'
+                    }`}
+                  >
+                    <Icon size={16} strokeWidth={2} />
+                  </span>
+                  {label}
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -141,14 +153,16 @@ export function Layout() {
               <Bell size={17} />
               <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-accent" />
             </button>
-            <UserAvatar size={44} float />
+            <NavLink to="/settings" aria-label="Profile settings">
+              <UserAvatar size={44} float />
+            </NavLink>
           </div>
         </header>
 
         <main className="scrollbar-hide min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain px-1 pt-0 pb-20 sm:px-2 lg:px-2 lg:pb-0 xl:px-4">
           <div className="mx-auto max-w-6xl">
             <div className="sticky top-0 z-20 mb-3 flex items-center justify-between gap-3 bg-[#e8eef6] py-2 lg:hidden">
-              <div className="flex items-center gap-3">
+              <NavLink to="/settings" className="flex items-center gap-3">
                 <UserAvatar size={48} float />
                 <div>
                   <p className="font-display text-base font-semibold text-ink">
@@ -156,7 +170,7 @@ export function Layout() {
                   </p>
                   <p className="text-xs text-muted">{pageTitle}</p>
                 </div>
-              </div>
+              </NavLink>
               {active ? (
                 <span className="rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent-deep">
                   Live · {formatDuration(sessionMinutes(active))}
@@ -176,8 +190,10 @@ export function Layout() {
               to={to}
               end={end}
               className={({ isActive }) =>
-                `flex flex-1 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold ${
-                  isActive ? 'text-ink' : 'text-faint'
+                `flex flex-1 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold transition ${
+                  isActive
+                    ? 'bg-white text-ink shadow-[4px_6px_12px_rgba(148,163,184,0.45),-2px_-2px_8px_rgba(255,255,255,0.9)]'
+                    : 'text-faint'
                 }`
               }
             >

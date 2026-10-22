@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { format, parseISO, startOfWeek, eachDayOfInterval, isSameDay } from 'date-fns'
 import { SoftBarChart } from '../components/Charts'
+import { PageEnter } from '../components/PageEnter'
 import { Button, Empty, PageHeader, Panel, PanelTitle, Stat, StatusPill } from '../components/ui'
 import {
   formatDuration,
@@ -76,7 +77,7 @@ export function Reports() {
   }
 
   return (
-    <div className="pt-3">
+    <PageEnter className="pt-3">
       <PageHeader
         eyebrow="Insights"
         title="Reports"
@@ -188,6 +189,6 @@ export function Reports() {
           )}
         </Panel>
       </div>
-    </div>
+    </PageEnter>
   )
 }

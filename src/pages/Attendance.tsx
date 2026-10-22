@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Coffee, LogIn, LogOut, Play, Square } from 'lucide-react'
+import { Coffee, LogIn, LogOut, Play, Square, Trash2 } from 'lucide-react'
+import { PageEnter } from '../components/PageEnter'
 import {
   Button,
   Empty,
@@ -32,6 +33,8 @@ export function Attendance() {
   const punch = useStore((s) => s.punch)
   const startSession = useStore((s) => s.startSession)
   const stopSession = useStore((s) => s.stopSession)
+  const removeAttendance = useStore((s) => s.removeAttendance)
+  const removeSession = useStore((s) => s.removeSession)
 
   const [label, setLabel] = useState('')
   const [projectId, setProjectId] = useState('')
@@ -50,7 +53,7 @@ export function Attendance() {
   }, [])
 
   return (
-    <div className="pt-3">
+    <PageEnter className="pt-3">
       <PageHeader eyebrow="Attendance" title="Time" />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
@@ -126,14 +129,15 @@ export function Attendance() {
                 />
               </Field>
               <Field label="Link project">
-                <Select value={projectId} onChange={(e) => setProjectId(e.target.value)}>
-                  <option value="">Unassigned</option>
-                  {projects.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </Select>
+                <Select
+                  value={projectId}
+                  onChange={setProjectId}
+                  emptyLabel="Unassigned"
+                  options={[
+                    { value: '', label: 'Unassigned' },
+                    ...projects.map((p) => ({ value: p.id, label: p.name })),
+                  ]}
+                />
               </Field>
               <Button
                 onClick={() => {
@@ -156,12 +160,20 @@ export function Attendance() {
               {todaysEvents.map((e) => (
                 <li
                   key={e.id}
-                  className="flex items-center justify-between border-b border-line-soft py-3 text-sm last:border-0"
+                  className="flex items-center justify-between gap-3 border-b border-line-soft py-3 text-sm last:border-0"
                 >
-                  <span className="capitalize text-ink">
-                    {e.kind.replace('_', ' ')}
-                  </span>
-                  <span className="tabular-nums text-muted">{formatClock(e.at)}</span>
+                  <span className="capitalize text-ink">{e.kind.replace('_', ' ')}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="tabular-nums text-muted">{formatClock(e.at)}</span>
+                    <button
+                      type="button"
+                      aria-label="Delete punch"
+                      className="rounded-lg p-1.5 text-faint hover:bg-danger-soft hover:text-danger"
+                      onClick={() => void removeAttendance(e.id)}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -182,6 +194,7 @@ export function Attendance() {
                     <th className="pb-3 font-medium">Start</th>
                     <th className="pb-3 font-medium">End</th>
                     <th className="pb-3 font-medium text-right">Duration</th>
+                    <th className="pb-3 font-medium text-right"> </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -200,6 +213,18 @@ export function Attendance() {
                       <td className="py-3 text-right tabular-nums text-ink">
                         {formatDuration(sessionMinutes(s))}
                       </td>
+                      <td className="py-3 text-right">
+                        <button
+                          type="button"
+                          aria-label="Delete session"
+                          className="rounded-lg p-1.5 text-faint hover:bg-danger-soft hover:text-danger"
+                          onClick={() => {
+                            if (window.confirm('Delete this session?')) void removeSession(s.id)
+                          }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -209,6 +234,6 @@ export function Attendance() {
           <p className="mt-4 text-xs text-faint">{formatDay(new Date().toISOString())}</p>
         </Panel>
       </div>
-    </div>
+    </PageEnter>
   )
 }

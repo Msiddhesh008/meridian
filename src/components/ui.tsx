@@ -1,4 +1,6 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react'
+import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
+
+export { Select, type SelectOption } from './Select'
 
 export function PageHeader({
   eyebrow,
@@ -104,10 +106,10 @@ export function Field({
   children: ReactNode
 }) {
   return (
-    <label className="block space-y-1.5">
+    <div className="block space-y-1.5">
       <span className="text-xs font-semibold text-muted">{label}</span>
       {children}
-    </label>
+    </div>
   )
 }
 
@@ -117,12 +119,6 @@ const fieldClass =
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input {...props} className={`${fieldClass} ${props.className ?? ''}`} />
-  )
-}
-
-export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
-  return (
-    <select {...props} className={`${fieldClass} ${props.className ?? ''}`} />
   )
 }
 

@@ -26,8 +26,8 @@ import {
   TextArea,
 } from '../components/ui'
 import { SoftBarChart, SoftDonut } from '../components/Charts'
+import { PageEnter } from '../components/PageEnter'
 import { UserAvatar } from '../components/UserAvatar'
-import { profile } from '../config/profile'
 import {
   clockInTime,
   derivePresence,
@@ -41,6 +41,7 @@ import {
 import { allocatedHours, useStore } from '../store/useStore'
 
 export function Dashboard() {
+  const profile = useStore((s) => s.profile)
   const members = useStore((s) => s.members)
   const projects = useStore((s) => s.projects)
   const assignments = useStore((s) => s.assignments)
@@ -108,7 +109,7 @@ export function Dashboard() {
   const recentSessions = [...sessions].reverse().slice(0, 4)
 
   return (
-    <div className="space-y-5 pt-3">
+    <PageEnter className="space-y-5 pt-3">
       {/* Hero banner — like reference */}
       <section
         className="relative overflow-hidden rounded-[1.75rem] px-6 py-6 sm:px-8 sm:py-7"
@@ -302,14 +303,15 @@ export function Dashboard() {
                 />
               </Field>
               <Field label="Project">
-                <Select value={projectId} onChange={(e) => setProjectId(e.target.value)}>
-                  <option value="">Unassigned</option>
-                  {activeProjects.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </Select>
+                <Select
+                  value={projectId}
+                  onChange={setProjectId}
+                  emptyLabel="Unassigned"
+                  options={[
+                    { value: '', label: 'Unassigned' },
+                    ...activeProjects.map((p) => ({ value: p.id, label: p.name })),
+                  ]}
+                />
               </Field>
               <div className="flex items-end">
                 <Button
@@ -460,6 +462,6 @@ export function Dashboard() {
           </Button>
         </Link>
       </div>
-    </div>
+    </PageEnter>
   )
 }
